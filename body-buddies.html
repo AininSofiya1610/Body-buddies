@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Body Buddies — Kedah Medical Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#FFF3E0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px;font-family:'Nunito',sans-serif}
+.game{width:100%;max-width:560px;background:#FFF9F0;border-radius:24px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.10)}
+
+/* topbar */
+.topbar{background:#FF6B6B;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Fredoka One',cursive;font-size:22px;color:#fff;letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.lang-btn{background:#fff;color:#FF6B6B;border:none;border-radius:20px;padding:5px 14px;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s}
+.lang-btn:hover{background:#FFE4E4}
+.stars{display:flex;gap:3px}
+.star{font-size:18px;transition:transform 0.3s}
+.star.earned{transform:scale(1.25)}
+
+/* scene */
+.scene{padding:20px 18px 24px;min-height:440px;display:flex;flex-direction:column;align-items:center;transition:background 0.4s}
+
+/* progress dots */
+.progress{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
+.prog-dot{width:11px;height:11px;border-radius:50%;background:#ddd;transition:background 0.3s,transform 0.3s}
+.prog-dot.done{background:#FF6B6B}
+.prog-dot.active{background:#FFD93D;transform:scale(1.35)}
+
+/* speech bubble */
+.bubble{background:#fff;border:3px solid #FFD93D;border-radius:20px;padding:13px 18px;font-size:15px;font-weight:700;color:#333;text-align:center;max-width:100%;margin-bottom:16px;line-height:1.55;position:relative}
+.bubble:after{content:'';position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);border:8px solid transparent;border-top-color:#FFD93D}
+
+/* characters */
+.character-area{display:flex;justify-content:center;align-items:flex-end;gap:14px;margin:6px 0 16px;flex-wrap:wrap}
+.char-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform 0.2s;border-radius:16px;padding:6px 8px}
+.char-wrap:hover{transform:scale(1.08)}
+.char-name{font-size:12px;font-weight:800;text-align:center}
+
+/* action area */
+.action-area{width:100%;max-width:480px}
+.q-bubble{background:#fff;border:3px solid #A78BFA;border-radius:18px;padding:11px 16px;font-size:15px;font-weight:700;color:#5B21B6;text-align:center;margin-bottom:10px}
+.choice-btn{display:block;width:100%;margin:7px 0;padding:11px 15px;border-radius:13px;border:3px solid transparent;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:transform 0.15s;text-align:left}
+.choice-btn:hover:not(:disabled){transform:scale(1.02)}
+.choice-btn.opt-a{background:#E8F4FF;border-color:#4DABF7;color:#1864AB}
+.choice-btn.opt-b{background:#FFF0F6;border-color:#F783AC;color:#9C1B3E}
+.choice-btn.opt-c{background:#EBFBEE;border-color:#51CF66;color:#1B5E20}
+.choice-btn.correct{background:#EBFBEE!important;border-color:#51CF66!important;color:#1B5E20!important}
+.choice-btn.wrong{background:#FFF5F5!important;border-color:#FF6B6B!important;color:#c0392b!important}
+.choice-btn:disabled{cursor:default;opacity:0.85}
+
+.hint-box{background:#FEF9C3;border:2px dashed #F59E0B;border-radius:14px;padding:9px 14px;font-size:14px;font-weight:700;color:#92400E;text-align:center;margin-bottom:10px}
+.pick-label{text-align:center;font-size:13px;color:#888;margin-top:-8px;margin-bottom:8px}
+
+.next-btn{display:none;margin:14px auto 0;background:#FF6B6B;color:#fff;border:none;border-radius:14px;padding:11px 30px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s}
+.next-btn:hover{background:#e55a5a}
+.next-btn.show{display:block}
+
+/* end screen */
+.end-screen{text-align:center;padding:1.5rem 1rem}
+.end-emoji{font-size:60px;margin-bottom:10px;animation:bounce 0.7s ease infinite alternate}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+.end-title{font-family:'Fredoka One',cursive;font-size:30px;color:#FF6B6B;margin-bottom:6px}
+.end-msg{font-size:15px;color:#444;line-height:1.7;margin-bottom:20px}
+.end-msg strong{color:#FF6B6B}
+.play-again{background:#FF6B6B;color:#fff;border:none;border-radius:14px;padding:13px 34px;font-size:17px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:background 0.15s}
+.play-again:hover{background:#e55a5a}
+
+/* intro */
+.intro-screen{text-align:center;padding:2rem 1rem}
+.intro-title{font-family:'Fredoka One',cursive;font-size:34px;color:#FF6B6B;margin-bottom:6px}
+.intro-sub{font-size:15px;color:#666;margin-bottom:20px;line-height:1.6}
+.start-btn{background:#FF6B6B;color:#fff;border:none;border-radius:16px;padding:14px 36px;font-size:18px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer}
+.kmc-badge{display:inline-block;background:#E1F5EE;color:#0F6E56;font-size:12px;font-weight:800;padding:4px 14px;border-radius:20px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="game" id="game">
+  <div class="topbar">
+    <span class="logo">Body Buddies! 🏥</span>
+    <div class="topbar-right">
+      <button class="lang-btn" id="lang-btn" onclick="toggleLang()">BM</button>
+      <div class="stars" id="stars">
+        <span class="star" id="s0">☆</span>
+        <span class="star" id="s1">☆</span>
+        <span class="star" id="s2">☆</span>
+        <span class="star" id="s3">☆</span>
+        <span class="star" id="s4">☆</span>
+      </div>
+    </div>
+  </div>
+  <div class="scene" id="scene"></div>
+</div>
+
+<script>
+let lang = 'en';
+let current = 0, score = 0, answered = false;
+
+function t(en, bm){ return lang==='en' ? en : bm; }
+
+function heartSVG(size){
+  size=size||90;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 90 90"><circle cx="45" cy="45" r="42" fill="#FFE4E4" stroke="#FF6B6B" stroke-width="3"/><path d="M45 65 C20 50 15 30 30 22 C38 17 45 25 45 25 C45 25 52 17 60 22 C75 30 70 50 45 65Z" fill="#FF6B6B"/><ellipse cx="35" cy="30" rx="5" ry="3" fill="#fff" opacity="0.5"/><circle cx="45" cy="45" r="5" fill="#fff" opacity="0.3"/></svg>`;
+}
+function brainSVG(size){
+  size=size||90;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 90 90"><circle cx="45" cy="45" r="42" fill="#F3E8FF" stroke="#A855F7" stroke-width="3"/><ellipse cx="37" cy="43" rx="16" ry="18" fill="#C084FC" stroke="#A855F7" stroke-width="2"/><ellipse cx="55" cy="43" rx="14" ry="18" fill="#C084FC" stroke="#A855F7" stroke-width="2"/><path d="M37 27 Q45 23 55 27" fill="none" stroke="#A855F7" stroke-width="2"/><path d="M29 43 Q34 38 29 51" fill="none" stroke="#7C3AED" stroke-width="1.5"/><path d="M59 38 Q65 44 59 53" fill="none" stroke="#7C3AED" stroke-width="1.5"/><ellipse cx="35" cy="34" rx="4" ry="2.5" fill="#fff" opacity="0.5"/></svg>`;
+}
+function lungSVG(size){
+  size=size||90;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 90 90"><circle cx="45" cy="45" r="42" fill="#DBEAFE" stroke="#60A5FA" stroke-width="3"/><ellipse cx="30" cy="51" rx="12" ry="17" fill="#93C5FD" stroke="#60A5FA" stroke-width="2"/><ellipse cx="60" cy="51" rx="12" ry="17" fill="#93C5FD" stroke="#60A5FA" stroke-width="2"/><rect x="42" y="26" width="6" height="22" rx="3" fill="#60A5FA"/><ellipse cx="28" cy="45" rx="5" ry="3" fill="#fff" opacity="0.4"/><ellipse cx="58" cy="45" rx="5" ry="3" fill="#fff" opacity="0.4"/></svg>`;
+}
+function stomachSVG(size){
+  size=size||90;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 90 90"><circle cx="45" cy="45" r="42" fill="#FEF3C7" stroke="#F59E0B" stroke-width="3"/><path d="M25 38 Q22 52 32 62 Q42 70 55 65 Q68 60 68 48 Q68 36 60 30 Q52 25 43 28 Q35 30 25 38Z" fill="#FCD34D" stroke="#F59E0B" stroke-width="2"/><path d="M35 40 Q40 38 45 42 Q50 46 55 42" fill="none" stroke="#D97706" stroke-width="2"/><ellipse cx="36" cy="37" rx="5" ry="3" fill="#fff" opacity="0.5"/></svg>`;
+}
+function eyeSVG(size){
+  size=size||90;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 90 90"><circle cx="45" cy="45" r="42" fill="#D1FAE5" stroke="#10B981" stroke-width="3"/><ellipse cx="45" cy="45" rx="22" ry="14" fill="#fff" stroke="#10B981" stroke-width="2"/><circle cx="45" cy="45" r="9" fill="#10B981"/><circle cx="45" cy="45" r="5" fill="#065F46"/><circle cx="41" cy="41" r="2.5" fill="#fff" opacity="0.8"/></svg>`;
+}
+function boneSVG(size){
+  size=size||90;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 90 90"><circle cx="45" cy="45" r="42" fill="#F1F5F9" stroke="#94A3B8" stroke-width="3"/><rect x="38" y="22" width="14" height="46" rx="5" fill="#CBD5E1" stroke="#94A3B8" stroke-width="2"/><circle cx="45" cy="22" r="8" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/><circle cx="45" cy="68" r="8" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/><ellipse cx="40" cy="24" rx="3" ry="2" fill="#fff" opacity="0.6"/></svg>`;
+}
+function earSVG(size){
+  size=size||90;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 90 90"><circle cx="45" cy="45" r="42" fill="#FDE68A" stroke="#F59E0B" stroke-width="3"/><path d="M30 32 Q20 45 28 58 Q34 66 40 62 Q44 59 42 54 Q48 56 52 50 Q58 40 52 30 Q44 20 30 32Z" fill="#FCD34D" stroke="#F59E0B" stroke-width="2"/><path d="M36 38 Q33 45 36 52" fill="none" stroke="#D97706" stroke-width="2"/><ellipse cx="33" cy="37" rx="3" ry="2" fill="#fff" opacity="0.5"/></svg>`;
+}
+
+function getStory(){
+  return [
+    {
+      bg:'#FFF9F0',
+      bubble: t("Hi! I am Hiro the Heart! 💖 I live inside your chest and go BOOM-BOOM all day! Can you find me?","Hai! Saya Hiro si Jantung! 💖 Saya tinggal dalam dada kamu dan berbunyi BOOM-BOOM! Boleh kamu cari saya?"),
+      chars:[
+        {svg:heartSVG(),name:t("Hiro the Heart","Hiro si Jantung"),color:"#FF6B6B"},
+        {svg:brainSVG(),name:t("Bella the Brain","Bella si Otak"),color:"#A855F7"},
+        {svg:lungSVG(),name:t("Luna the Lung","Luna si Paru-paru"),color:"#60A5FA"},
+      ],
+      type:'pick', answer:0,
+      hint:t("I go BOOM-BOOM in your chest! Tap me!","Saya berbunyi BOOM-BOOM di dada! Ketuk saya!")
+    },
+    {
+      bg:'#FFF0F6',
+      bubble:t("Yay! You found me! 🎉 I pump blood all around your body! Even to your fingers and toes!","Yeay! Kamu jumpa saya! 🎉 Saya mengepam darah ke seluruh badan kamu! Sampai jari tangan dan kaki!"),
+      chars:[{svg:heartSVG(),name:t("Hiro the Heart","Hiro si Jantung"),color:"#FF6B6B"}],
+      type:'quiz',
+      question:t("What does the heart do?","Apa yang jantung lakukan?"),
+      options:[
+        t("Pumps blood around the body","Mengepam darah ke seluruh badan"),
+        t("Helps you think and dream","Membantu kamu berfikir dan bermimpi"),
+        t("Helps you breathe air","Membantu kamu bernafas")
+      ],
+      answer:0
+    },
+    {
+      bg:'#F0FFF4',
+      bubble:t("Hello! I am Bella the Brain! 🧠 I live inside your head. I help you think, learn, and dream at night!","Helo! Saya Bella si Otak! 🧠 Saya tinggal dalam kepala kamu. Saya membantu kamu berfikir, belajar, dan bermimpi!"),
+      chars:[{svg:brainSVG(),name:t("Bella the Brain","Bella si Otak"),color:"#A855F7"}],
+      type:'quiz',
+      question:t("Where does the brain live?","Di mana otak tinggal?"),
+      options:[
+        t("In your tummy","Dalam perut kamu"),
+        t("Inside your head","Dalam kepala kamu"),
+        t("In your chest","Dalam dada kamu")
+      ],
+      answer:1
+    },
+    {
+      bg:'#EFF6FF',
+      bubble:t("Hi there! I am Luna the Lung! 🫁 There are TWO of me! When you breathe in — we fill up with air. Breathe out — we push it away!","Hai! Saya Luna si Paru-paru! 🫁 Ada DUA saya! Bila kamu tarik nafas — kami penuh dengan udara. Hembus nafas — kami tolak keluar!"),
+      chars:[{svg:lungSVG(),name:t("Luna the Lung","Luna si Paru-paru"),color:"#60A5FA"}],
+      type:'quiz',
+      question:t("How many lungs do you have?","Berapa banyak paru-paru yang kamu ada?"),
+      options:[t("One","Satu"), t("Two","Dua"), t("Three","Tiga")],
+      answer:1
+    },
+    {
+      bg:'#FFFBEB',
+      bubble:t("I am Stommy the Stomach! 🌟 When you eat yummy food, it travels down to me! I break it into tiny pieces so your body gets energy!","Saya Stommy si Perut! 🌟 Bila kamu makan makanan sedap, ia turun ke saya! Saya pecahkan menjadi kepingan kecil supaya badan kamu dapat tenaga!"),
+      chars:[{svg:stomachSVG(),name:t("Stommy the Stomach","Stommy si Perut"),color:"#F59E0B"}],
+      type:'quiz',
+      question:t("What does the stomach do?","Apa yang perut lakukan?"),
+      options:[
+        t("Pumps blood","Mengepam darah"),
+        t("Digests your food","Mencernakan makanan kamu"),
+        t("Helps you see","Membantu kamu melihat")
+      ],
+      answer:1
+    },
+    {
+      bg:'#ECFDF5',
+      bubble:t("Whoa! I am Ella the Eye! 👁️ I help you see colours, shapes, and your friends! You have TWO eyes — one on each side of your nose!","Wah! Saya Ella si Mata! 👁️ Saya membantu kamu melihat warna, bentuk, dan kawan-kawan kamu! Kamu ada DUA mata!"),
+      chars:[{svg:eyeSVG(),name:t("Ella the Eye","Ella si Mata"),color:"#10B981"}],
+      type:'quiz',
+      question:t("What do your eyes help you do?","Apa yang mata kamu bantu lakukan?"),
+      options:[
+        t("Hear sounds","Mendengar bunyi"),
+        t("See the world","Melihat dunia"),
+        t("Taste food","Merasa makanan")
+      ],
+      answer:1
+    },
+    {
+      bg:'#F8FAFC',
+      bubble:t("Hi! I am Benny the Bone! 🦴 You have 206 bones inside you! Bones keep you standing tall and protect your organs!","Hai! Saya Benny si Tulang! 🦴 Kamu ada 206 tulang dalam badan! Tulang menjaga kamu berdiri tegak dan melindungi organ kamu!"),
+      chars:[{svg:boneSVG(),name:t("Benny the Bone","Benny si Tulang"),color:"#94A3B8"}],
+      type:'quiz',
+      question:t("What do bones do?","Apa yang tulang lakukan?"),
+      options:[
+        t("Help you digest food","Membantu mencernakan makanan"),
+        t("Keep your body standing and protect organs","Menjaga badan tegak dan melindungi organ"),
+        t("Pump blood around the body","Mengepam darah ke seluruh badan")
+      ],
+      answer:1
+    },
+    {
+      bg:'#FFFBEB',
+      bubble:t("I am Eddie the Ear! 👂 I hear everything around you — music, voices, and even the rain! Which body part helps you HEAR?","Saya Eddie si Telinga! 👂 Saya mendengar segala-galanya — muzik, suara, dan hujan! Bahagian badan mana yang membantu kamu MENDENGAR?"),
+      chars:[
+        {svg:eyeSVG(),name:t("Ella the Eye","Ella si Mata"),color:"#10B981"},
+        {svg:earSVG(),name:t("Eddie the Ear","Eddie si Telinga"),color:"#F59E0B"},
+        {svg:boneSVG(),name:t("Benny the Bone","Benny si Tulang"),color:"#94A3B8"},
+      ],
+      type:'pick', answer:1,
+      hint:t("I help you hear music and voices! Tap me!","Saya membantu kamu mendengar muzik dan suara! Ketuk saya!")
+    },
+    {
+      bg:'#FFF0F6',
+      bubble:t("Amazing! 🌈 Last challenge! Which body part pumps BLOOD all around your body?","Hebat! 🌈 Cabaran terakhir! Bahagian badan mana yang mengepam DARAH ke seluruh badan kamu?"),
+      chars:[
+        {svg:heartSVG(),name:t("Hiro the Heart","Hiro si Jantung"),color:"#FF6B6B"},
+        {svg:brainSVG(),name:t("Bella the Brain","Bella si Otak"),color:"#A855F7"},
+        {svg:stomachSVG(),name:t("Stommy the Stomach","Stommy si Perut"),color:"#F59E0B"},
+      ],
+      type:'pick', answer:0,
+      hint:t("I go BOOM-BOOM! Tap me!","Saya berbunyi BOOM-BOOM! Ketuk saya!")
+    },
+  ];
+}
+
+function playSound(type){
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if(type==='correct'){
+      osc.frequency.setValueAtTime(520,ctx.currentTime);
+      osc.frequency.setValueAtTime(660,ctx.currentTime+0.1);
+      osc.frequency.setValueAtTime(780,ctx.currentTime+0.2);
+      gain.gain.setValueAtTime(0.2,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
+      osc.start(); osc.stop(ctx.currentTime+0.5);
+    } else if(type==='wrong'){
+      osc.frequency.setValueAtTime(300,ctx.currentTime);
+      osc.frequency.setValueAtTime(220,ctx.currentTime+0.15);
+      gain.gain.setValueAtTime(0.15,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+      osc.start(); osc.stop(ctx.currentTime+0.4);
+    } else if(type==='star'){
+      [440,550,660,880].forEach((f,i)=>{
+        const o=ctx.createOscillator(); const g=ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value=f;
+        g.gain.setValueAtTime(0.12,ctx.currentTime+i*0.08);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.08+0.3);
+        o.start(ctx.currentTime+i*0.08); o.stop(ctx.currentTime+i*0.08+0.3);
+      });
+    }
+  } catch(e){}
+}
+
+function toggleLang(){
+  lang = lang==='en'?'bm':'en';
+  document.getElementById('lang-btn').textContent = lang==='en'?'BM':'EN';
+  renderScene();
+}
+
+function renderIntro(){
+  const scene=document.getElementById('scene');
+  scene.style.background='#FFF9F0';
+  scene.innerHTML=`
+    <div class="intro-screen">
+      <div style="font-size:64px;margin-bottom:10px">🏥</div>
+      <div class="kmc-badge">Kedah Medical Center</div>
+      <div class="intro-title">Body Buddies!</div>
+      <div class="intro-sub">${t("Meet your body friends!<br>Learn about your Heart, Brain, Lungs and more!<br>Earn ⭐ stars by answering correctly!","Jumpa kawan-kawan badan kamu!<br>Belajar tentang Jantung, Otak, Paru-paru dan lagi!<br>Kumpul ⭐ bintang dengan menjawab dengan betul!")}</div>
+      <button class="start-btn" onclick="startGame()">${t("Let's Play! 🎮","Jom Main! 🎮")}</button>
+    </div>
+  `;
+}
+
+function startGame(){
+  current=0; score=0;
+  updateStars();
+  renderScene();
+}
+
+function renderScene(){
+  const story=getStory();
+  const s=story[current];
+  const scene=document.getElementById('scene');
+  scene.style.background=s.bg;
+  answered=false;
+
+  let dotsHTML='';
+  story.forEach((_,i)=>{
+    dotsHTML+=`<div class="prog-dot ${i<current?'done':i===current?'active':''}"></div>`;
+  });
+
+  let charsHTML=s.chars.map((c,ci)=>`
+    <div class="char-wrap" onclick="charClick(${ci})" id="cw-${ci}">
+      ${c.svg}
+      <span class="char-name" style="color:${c.color}">${c.name}</span>
+    </div>`).join('');
+
+  let actionHTML='';
+  if(s.type==='quiz'){
+    actionHTML=`<div class="action-area">
+      <div class="q-bubble">${s.question}</div>
+      ${s.options.map((o,i)=>`<button class="choice-btn opt-${['a','b','c'][i]}" onclick="answerQ(${i})">${['🅐','🅑','🅒'][i]} ${o}</button>`).join('')}
+    </div>`;
+  } else {
+    actionHTML=`<div class="action-area">
+      <div class="hint-box">💡 ${s.hint}</div>
+      <p class="pick-label">${t("Tap the right character!","Ketuk watak yang betul!")}</p>
+    </div>`;
+  }
+
+  scene.innerHTML=`
+    <div class="progress">${dotsHTML}</div>
+    <div class="bubble" id="main-bubble">${s.bubble}</div>
+    <div class="character-area">${charsHTML}</div>
+    ${actionHTML}
+    <button class="next-btn" id="next-btn" onclick="nextScene()">${t("Next ➜","Seterusnya ➜")}</button>
+  `;
+}
+
+function charClick(idx){
+  if(answered) return;
+  const s=getStory()[current];
+  if(s.type!=='pick') return;
+  answered=true;
+  const wraps=document.querySelectorAll('.char-wrap');
+  if(idx===s.answer){
+    score++; updateStars(); playSound('correct');
+    wraps[idx].style.transform='scale(1.18)';
+    wraps[idx].style.background='#EBFBEE';
+    wraps[idx].style.border='3px solid #51CF66';
+    showFeedback(true);
+  } else {
+    playSound('wrong');
+    wraps[idx].style.opacity='0.4';
+    wraps[s.answer].style.background='#EBFBEE';
+    wraps[s.answer].style.border='3px solid #51CF66';
+    showFeedback(false);
+  }
+  document.getElementById('next-btn').className='next-btn show';
+}
+
+function answerQ(idx){
+  if(answered) return;
+  answered=true;
+  const s=getStory()[current];
+  const btns=document.querySelectorAll('.choice-btn');
+  btns.forEach(b=>b.disabled=true);
+  if(idx===s.answer){
+    score++; updateStars(); playSound('correct');
+    btns[idx].classList.add('correct');
+    showFeedback(true);
+  } else {
+    playSound('wrong');
+    btns[idx].classList.add('wrong');
+    btns[s.answer].classList.add('correct');
+    showFeedback(false);
+  }
+  document.getElementById('next-btn').className='next-btn show';
+}
+
+function showFeedback(correct){
+  const en_ok=["Woohoo! You are SO smart! 🌟","Amazing! Great job! 🎉","YES! That is right! 🥳","Brilliant! You are a Body Buddy! ⭐","Super duper correct! 🌈","Fantastic! Keep going! 💪"];
+  const bm_ok=["Wah! Kamu sangat pandai! 🌟","Hebat! Kerja bagus! 🎉","BETUL! Tahniah! 🥳","Bijak! Kamu seorang Body Buddy! ⭐","Betul sekali! Teruskan! 🌈","Luar biasa! Terus maju! 💪"];
+  const en_no=["Oops! Let us remember! 💪","Almost! Look at the right one! 🌟","Good try! Now you know! 😊"];
+  const bm_no=["Eh! Jom ingat semula! 💪","Hampir! Lihat yang betul! 🌟","Cubaan bagus! Sekarang kamu tahu! 😊"];
+  const pool = correct ? (lang==='en'?en_ok:bm_ok) : (lang==='en'?en_no:bm_no);
+  const msg = pool[Math.floor(Math.random()*pool.length)];
+  const bub=document.getElementById('main-bubble');
+  if(bub){
+    bub.textContent=msg;
+    bub.style.background=correct?'#EBFBEE':'#FFF5F5';
+    bub.style.borderColor=correct?'#51CF66':'#FF6B6B';
+    bub.style.setProperty('--arrow-color', correct?'#51CF66':'#FF6B6B');
+  }
+}
+
+function updateStars(){
+  const earned=Math.min(score,5);
+  for(let i=0;i<5;i++){
+    const el=document.getElementById('s'+i);
+    if(i<earned){ el.textContent='⭐'; el.classList.add('earned'); }
+    else { el.textContent='☆'; el.classList.remove('earned'); }
+  }
+  if(score>0) playSound('star');
+}
+
+function nextScene(){
+  current++;
+  if(current>=getStory().length){ showEnd(); return; }
+  renderScene();
+}
+
+function showEnd(){
+  const scene=document.getElementById('scene');
+  scene.style.background='#FFF9F0';
+  const medals = score>=7?t('🏆 Body Buddy Champion!','🏆 Juara Body Buddy!'):score>=5?t('🥈 Super Smart!','🥈 Sangat Pandai!'):t('🌟 Great Explorer!','🌟 Penjelajah Hebat!');
+  const learnedEN="Heart ❤️, Brain 🧠, Lungs 🫁, Stomach 🌟, Eyes 👁️, Bones 🦴 and Ears 👂";
+  const learnedBM="Jantung ❤️, Otak 🧠, Paru-paru 🫁, Perut 🌟, Mata 👁️, Tulang 🦴 dan Telinga 👂";
+  scene.innerHTML=`
+    <div class="end-screen">
+      <div class="end-emoji">🎊</div>
+      <div class="end-title">${t("You finished!","Kamu berjaya!")}</div>
+      <div class="end-msg">
+        ${t("You earned","Kamu dapat")} <strong>${score} ${t("out of","daripada")} ${getStory().length} ${t("stars","bintang")}</strong>!<br>
+        ${medals}<br><br>
+        ${t("You learned about the","Kamu telah belajar tentang")}<br>
+        <strong>${lang==='en'?learnedEN:learnedBM}</strong>!<br><br>
+        ${t("You are a real Body Buddy!","Kamu adalah Body Buddy sebenar!")} 🥳
+      </div>
+      <button class="play-again" onclick="restartGame()">${t("Play Again! 🎮","Main Lagi! 🎮")}</button>
+    </div>
+  `;
+  playSound('star');
+}
+
+function restartGame(){
+  current=0; score=0;
+  for(let i=0;i<5;i++){
+    const el=document.getElementById('s'+i);
+    el.textContent='☆'; el.classList.remove('earned');
+  }
+  renderIntro();
+}
+
+renderIntro();
+</script>
+</body>
+</html>
