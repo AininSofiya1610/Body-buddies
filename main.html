@@ -81,6 +81,7 @@ body{background:#FFF3E0;min-height:100vh;display:flex;flex-direction:column;alig
   <div class="topbar">
     <span class="logo">Body Buddies! 🏥</span>
     <div class="topbar-right">
+      <button class="lang-btn" id="mute-btn" onclick="toggleMute()" title="Toggle music">🔊</button>
       <button class="lang-btn" id="lang-btn" onclick="toggleLang()">BM</button>
       <div class="stars" id="stars">
         <span class="star" id="s0">☆</span>
@@ -273,6 +274,54 @@ function playSound(type){
   } catch(e){}
 }
 
+let bgCtx=null, bgGain=null, bgMuted=false, bgPlaying=false;
+const MELODY=[
+  [523,0.3],[587,0.15],[659,0.15],[698,0.3],[784,0.3],
+  [698,0.15],[659,0.15],[587,0.3],[523,0.3],[523,0.15],
+  [494,0.15],[523,0.3],[659,0.3],[784,0.3],[880,0.3],
+  [784,0.15],[698,0.15],[659,0.3],[587,0.3],[523,0.6],
+  [659,0.3],[784,0.3],[880,0.3],[784,0.15],[698,0.15],
+  [659,0.3],[587,0.3],[523,0.3],[494,0.3],[523,0.6],
+];
+
+function startBgMusic(){
+  if(bgPlaying) return;
+  try{
+    bgCtx=new (window.AudioContext||window.webkitAudioContext)();
+    bgGain=bgCtx.createGain();
+    bgGain.gain.value=bgMuted?0:0.07;
+    bgGain.connect(bgCtx.destination);
+    bgPlaying=true;
+    scheduleMelody(bgCtx.currentTime);
+  }catch(e){}
+}
+
+function scheduleMelody(startTime){
+  if(!bgCtx||!bgGain) return;
+  let t=startTime;
+  MELODY.forEach(([freq,dur])=>{
+    const osc=bgCtx.createOscillator();
+    const g=bgCtx.createGain();
+    osc.type='sine';
+    osc.frequency.value=freq;
+    osc.connect(g); g.connect(bgGain);
+    g.gain.setValueAtTime(0.001,t);
+    g.gain.linearRampToValueAtTime(1,t+0.02);
+    g.gain.setValueAtTime(1,t+dur-0.05);
+    g.gain.linearRampToValueAtTime(0.001,t+dur);
+    osc.start(t); osc.stop(t+dur+0.05);
+    t+=dur;
+  });
+  const totalDur=MELODY.reduce((s,[,d])=>s+d,0);
+  setTimeout(()=>{ if(bgPlaying&&bgCtx) scheduleMelody(bgCtx.currentTime); }, (totalDur-0.5)*1000);
+}
+
+function toggleMute(){
+  bgMuted=!bgMuted;
+  document.getElementById('mute-btn').textContent=bgMuted?'🔇':'🔊';
+  if(bgGain) bgGain.gain.setTargetAtTime(bgMuted?0:0.07, bgCtx.currentTime, 0.1);
+}
+
 function toggleLang(){
   lang = lang==='en'?'bm':'en';
   document.getElementById('lang-btn').textContent = lang==='en'?'BM':'EN';
@@ -296,6 +345,7 @@ function renderIntro(){
 function startGame(){
   current=0; score=0;
   updateStars();
+  startBgMusic();
   renderScene();
 }
 
