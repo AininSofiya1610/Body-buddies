@@ -1,1 +1,2 @@
-**Live demo:** [uum-cgpa-calculator.vercel.app](https://aininsofiya1610.github.io/Body-buddies/)
+## **Live demo:** 
+[aininsofiya1610.github.io/Body-buddies/](https://aininsofiya1610.github.io/Body-buddies/)
